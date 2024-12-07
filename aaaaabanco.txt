@@ -1,0 +1,196 @@
+//import * as SQLite from 'expo-sqlite';
+import SQLite from 'react-native-sqlite-storage';
+
+
+// Abre ou cria o banco de dados local
+const db = SQLite.openDatabaseA('appDatabase.db');
+
+// Função para executar comandos SQL
+export const dbExecute = (sql, params = []) => {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        sql,
+        params,
+        (_, result) => resolve(result),
+        (_, error) => reject(error)
+      );
+    });
+  });
+};
+
+// Exemplo de inicialização de tabelas
+export const initDatabase = async () => {
+  try {
+    await dbExecute(`
+      CREATE TABLE IF NOT EXISTS Usuarios (
+        Id_Usuario INTEGER PRIMARY KEY AUTOINCREMENT,
+        Nome TEXT NOT NULL,
+        CPF TEXT NOT NULL,
+        Email TEXT NOT NULL,
+        Senha TEXT NOT NULL
+      );
+    `);
+
+    await dbExecute(`
+      CREATE TABLE IF NOT EXISTS Reservas (
+        Id_Reserva INTEGER PRIMARY KEY AUTOINCREMENT,
+        Nome TEXT NOT NULL,
+        CPF TEXT NOT NULL,
+        Unidade TEXT NOT NULL,
+        DataReserva TEXT NOT NULL,
+        QuantPessoas INTEGER NOT NULL
+      );
+    `);
+
+    console.log('Tabelas criadas com sucesso!');
+  } catch (error) {
+    console.error('Erro ao inicializar o banco de dados:', error);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
+import { useState } from 'react';
+import { dbExecute } from '../database/database';
+
+
+export default function Reservas() {
+  const [nome, setNome] = useState('');
+  const [cpf, setCpf] = useState('');
+  const [unidade, setUnidade] = useState('GRU - Internacional'); // Valor inicial padrão
+  const [dataReserva, setDataReserva] = useState('');
+  const [quantPessoas, setQuantPessoas] = useState('');
+  const [open, setOpen] = useState(false); // Controla se o dropdown está aberto
+  const [unit, setUnit] = useState(null); // Armazena o valor selecionado
+
+  const unitData = [
+    { label: 'GRU - Internacional', value: 'GRU-Inter' },
+    { label: 'GRU - Maia', value: 'GRU-Maia' },
+    { label: 'SP - Parada Inglesa', value: 'SP-Inglesa' },
+  ];
+
+  const handleReserva = async () => {
+    try {
+      await dbExecute(
+        'INSERT INTO Reservas (Nome, CPF, Unidade, DataReserva, QuantPessoas) VALUES (?, ?, ?, ?, ?)',
+        [nome, cpf, unidade, dataReserva, quantPessoas]
+      );
+      alert('Reserva cadastrada com sucesso!');
+    } catch (error) {
+      console.error(error);
+      alert('Erro ao cadastrar reserva!');
+    }
+  };
+  return (
+    <View style={styles.container}>
+      <View style={styles.legenda}>
+        <Text style={styles.title}>#Reserva</Text>
+        <Text style={styles.span}>Reserve sua mesa com antecendência e evite filas de espera.</Text>
+      </View>
+      <View>
+        <View>
+          
+            <Text style={styles.label}>Nome:</Text>
+            <TextInput placeholder="Nome" value={nome} onChangeText={setNome} style={styles.input} />
+
+            <Text style={styles.label}>CPF:</Text>
+            <TextInput placeholder="CPF" value={cpf} onChangeText={setCpf} style={styles.input} keyboardType="numeric" />
+
+            <Text style={styles.label}>Unidade: </Text>
+            <DropDownPicker
+          open={open}
+          value={unit}
+          items={unitData}
+          setOpen={setOpen}
+          setValue={setUnit}
+          placeholder="Escolha a unidade"
+          style={styles.input}
+        />
+
+            <Text style={styles.label}>Horário:</Text>
+            <TextInput placeholder="Data e Hora (YYYY-MM-DD HH:MM)" value={dataReserva} onChangeText={setDataReserva} style={styles.input} />
+            
+            <Text style={styles.label}>Quant. de pessoas:</Text>
+            <TextInput placeholder="Quantidade de Pessoas" value={quantPessoas} onChangeText={setQuantPessoas} style={styles.input} keyboardType="numeric" />
+            
+            <TouchableOpacity style={styles.botao} onPress={handleReserva}>
+              <Text style={styles.txtBotao}>Reservar</Text>
+            </TouchableOpacity>
+        </View>
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 15,
+    backgroundColor: '#fff',
+  },
+  legenda:{
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+  },
+  title: {
+    fontSize: 45,
+    fontWeight: "bold",
+    color: '#A00F2D',
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+  },
+  span: {
+    textAlign: 'center',
+    fontFamily: 'Roboto',
+  },
+  label: {
+    fontFamily: 'Roboto',
+  },
+  input: {
+    width: '100%',
+    height: 35,
+    borderStyle: 'solid',
+    borderWidth: 2,
+    borderRadius: 10,
+    borderColor: '#D9D9D9',
+    fontFamily: 'Roboto',
+  },
+  botao:{
+    width: '100%',
+    height: 35,
+    backgroundColor: '#A00F2D',
+    borderWidth: 0,
+    marginTop: 10,
+    borderRadius: 10
+  },
+  txtBotao: {
+    textAlign:'center',
+    color: '#F9AD33',
+    fontSize: 25,
+    fontWeight: "bold",
+    fontFamily: 'Roboto',
+  }
+});

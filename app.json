@@ -2,9 +2,10 @@
   "expo": {
     "name": "OutbackProject",
     "slug": "OutbackProject",
+    "entryPoint": "./App.js",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo-amarelo.png",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
@@ -19,10 +20,22 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.kaua_sabino.OutbackProject"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "72da8fb7-2812-4dae-a304-7c825d382e8f"
+      }
+    },
+    "assetBundlePatterns": [
+      "./assets/images*"
+    ],
+    "plugins": [
+      "expo-sqlite"
+    ]
   }
 }
